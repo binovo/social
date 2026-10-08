@@ -6,6 +6,7 @@ from datetime import datetime
 from email.utils import COMMASPACE
 
 from odoo import fields, models
+from odoo.tools import clean_context
 
 
 class MailMail(models.Model):
@@ -37,5 +38,10 @@ class MailMail(models.Model):
         """
         email = super()._send_prepare_values(partner=partner)
         vals = self._tracking_email_prepare(partner, email)
-        tracking_email = self.env["mail.tracking.email"].sudo().create(vals)
+        tracking_email = (
+            self.env["mail.tracking.email"]
+            .sudo()
+            .with_context(clean_context(self.env.context))
+            .create(vals)
+        )
         return tracking_email.tracking_img_add(email)
